@@ -1,0 +1,28 @@
+# Smart Microgrid Platform - Apache Configuration
+# For XAMPP htdocs/microgrid-platform/
+
+RewriteEngine On
+
+# Prevent directory listing
+Options -Indexes
+
+# Protect sensitive directories
+<IfModule mod_rewrite.c>
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^database/(?!seed_demo_data\.php) - [F,L]
+</IfModule>
+
+# Set security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>

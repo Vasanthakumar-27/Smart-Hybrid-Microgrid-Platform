@@ -1,0 +1,25 @@
+# ============================================================
+# MicroGrid Pro — .gitignore
+# ============================================================
+
+# --- Sensitive config (collaborators copy from .example) ---
+config/database.php
+
+# --- Generated / runtime files ---
+_hashes.txt
+*.log
+*.tmp
+
+# --- XAMPP / server artefacts ---
+.htpasswd
+
+# --- OS files ---
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# --- Editor ---
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
