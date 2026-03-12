@@ -27,9 +27,10 @@ $success = false;
 // ============================================================================
 // Handle installation
 // ============================================================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
-    // CSRF check
-    if (!isset($_POST['csrf_token']) || !isset($_SESSION['install_csrf']) || !hash_equals($_SESSION['install_csrf'], $_POST['csrf_token'])) {
+$autorun = isset($_GET['autorun']); // allow PowerShell setup.ps1 to trigger silently
+if ($autorun || ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install']))) {
+    // CSRF check — skip for autorun (localhost-only, no user session available)
+    if (!$autorun && (!isset($_POST['csrf_token']) || !isset($_SESSION['install_csrf']) || !hash_equals($_SESSION['install_csrf'], $_POST['csrf_token']))) {
         $errors[] = 'Invalid CSRF token. Please refresh and try again.';
     } else {
         try {
@@ -233,6 +234,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install'])) {
             $errors[] = 'Database error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         }
     }
+}
+
+// If called by setup.ps1 (?autorun=1), return JSON and exit immediately
+if ($autorun) {
+    header('Content-Type: application/json');
+    if ($success) {
+        echo json_encode(['success' => true,  'message' => 'installed', 'steps' => $steps]);
+    } else {
+        echo json_encode(['success' => false, 'errors' => $errors]);
+    }
+    exit;
 }
 
 // Generate CSRF token
