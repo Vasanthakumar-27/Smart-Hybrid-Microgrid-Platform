@@ -4,6 +4,7 @@
  * Include at the top of every page after session check
  */
 require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/functions.php';
 requireLogin();
 
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
