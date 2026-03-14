@@ -1,6 +1,6 @@
 /* ============================================================================
    Smart Hybrid Microgrid Platform — Main Stylesheet
-   Modern dark-theme dashboard design
+   Modern dark-theme dashboard design with smooth animations & excellent UX
    ============================================================================ */
 
 :root {
@@ -20,6 +20,9 @@
     --accent-cyan: #06b6d4;
     --sidebar-width: 250px;
     --topbar-height: 60px;
+    --transition-quick: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-ease: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -34,6 +37,70 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background-color var(--transition-smooth);
+}
+
+/* ============================================================================
+   ANIMATIONS & KEYFRAMES
+   ============================================================================ */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
 }
 
 /* ============================================================================
@@ -50,11 +117,12 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-brand {
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -62,11 +130,22 @@ body {
     font-weight: 700;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
+    transition: all var(--transition-smooth);
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.sidebar-brand:hover {
+    padding-left: 1.75rem;
 }
 
 .sidebar-brand i {
     font-size: 1.5rem;
     color: var(--accent-green);
+    transition: transform var(--transition-smooth);
+}
+
+.sidebar-brand:hover i {
+    transform: scale(1.1) rotate(10deg);
 }
 
 .sidebar-nav {
@@ -79,30 +158,56 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.7rem 1.5rem;
+    padding: 0.8rem 1.5rem;
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all var(--transition-quick);
     border-left: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-nav .nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(16, 185, 129, 0.05);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-quick);
+    z-index: -1;
 }
 
 .sidebar-nav .nav-link:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    padding-left: 1.75rem;
+}
+
+.sidebar-nav .nav-link:hover::before {
+    transform: scaleX(1);
 }
 
 .sidebar-nav .nav-link.active {
     color: var(--accent-green);
-    background: rgba(16, 185, 129, 0.08);
+    background: rgba(16, 185, 129, 0.1);
     border-left-color: var(--accent-green);
+    font-weight: 600;
 }
 
 .sidebar-nav .nav-link i {
     font-size: 1.1rem;
     width: 20px;
     text-align: center;
+    transition: transform var(--transition-quick);
+}
+
+.sidebar-nav .nav-link:hover i {
+    transform: scale(1.15);
 }
 
 .nav-divider {
@@ -117,18 +222,31 @@ body {
 .sidebar-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .user-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: background var(--transition-quick);
+}
+
+.user-info:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .user-info i {
     font-size: 1.5rem;
-    color: var(--text-muted);
+    color: var(--accent-cyan);
+    transition: transform var(--transition-quick);
+}
+
+.user-info:hover i {
+    transform: scale(1.1);
 }
 
 .user-name {
@@ -148,6 +266,7 @@ body {
 .main-content {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .top-bar {
@@ -156,45 +275,69 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(30, 41, 59, 0.8));
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .page-title {
     font-size: 1.1rem;
     font-weight: 600;
+    animation: slideInLeft 0.4s ease-out;
 }
 
 .top-bar-right {
     margin-left: auto;
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
 .content-wrapper {
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
     max-width: 1400px;
+    animation: slideInUp 0.5s ease-out;
 }
 
 /* ============================================================================
    STAT CARDS
    ============================================================================ */
 .stat-card {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, var(--bg-card), rgba(30, 41, 59, 0.7));
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 1.25rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 1.5rem;
+    transition: all var(--transition-smooth);
     position: relative;
     overflow: hidden;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05), transparent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity var(--transition-smooth);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 .stat-card::before {
@@ -203,7 +346,13 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
+    border-radius: 16px 16px 0 0;
+    transition: height var(--transition-smooth);
+}
+
+.stat-card:hover::before {
+    height: 6px;
 }
 
 .stat-primary::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); }
@@ -213,9 +362,16 @@ body {
 .stat-info::before    { background: linear-gradient(90deg, var(--accent-cyan), #22d3ee); }
 
 .stat-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.7;
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+    transition: all var(--transition-smooth);
+    display: inline-block;
+}
+
+.stat-card:hover .stat-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .stat-primary .stat-icon { color: var(--accent-blue); }
@@ -225,76 +381,116 @@ body {
 .stat-info .stat-icon    { color: var(--accent-cyan); }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.2;
+    transition: all var(--transition-smooth);
+}
+
+.stat-card:hover .stat-value {
+    color: var(--text-primary);
 }
 
 .stat-label {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
 }
 
 /* ============================================================================
    DASHBOARD CARDS
    ============================================================================ */
 .dashboard-card, .card.dashboard-card {
-    background: var(--bg-card);
+    background: linear-gradient(135deg, var(--bg-card), rgba(30, 41, 59, 0.5));
     border: 1px solid var(--border-color);
     border-radius: 16px;
     overflow: hidden;
+    transition: all var(--transition-smooth);
+    animation: scaleIn 0.5s ease-out;
+}
+
+.dashboard-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
 .dashboard-card .card-header {
-    background: transparent;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), transparent);
     border-bottom: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
+    padding: 1.25rem;
     color: var(--text-primary);
+    font-weight: 600;
+    transition: background var(--transition-smooth);
+}
+
+.dashboard-card:hover .card-header {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), transparent);
 }
 
 .dashboard-card .card-header h6 {
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dashboard-card .card-header i {
+    transition: transform var(--transition-smooth);
+}
+
+.dashboard-card:hover .card-header i {
+    transform: scale(1.1);
 }
 
 .dashboard-card .card-body {
-    padding: 1.25rem;
+    padding: 1.5rem;
 }
 
 /* ============================================================================
    MICROGRID CARDS (Monitor View)
    ============================================================================ */
 .microgrid-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    transition: all 0.2s;
+    border-radius: 14px;
+    padding: 1.25rem;
+    transition: all var(--transition-smooth);
+    animation: slideInUp 0.5s ease-out;
+    cursor: pointer;
 }
 
 .microgrid-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
 }
 
 .microgrid-card.solar {
-    border-left: 3px solid var(--accent-yellow);
+    border-left: 4px solid var(--accent-yellow);
 }
 
 .microgrid-card.wind {
-    border-left: 3px solid var(--accent-blue);
+    border-left: 4px solid var(--accent-blue);
 }
 
 .mg-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    transition: all var(--transition-quick);
 }
 
 .mg-header > i {
     font-size: 1.5rem;
+    transition: all var(--transition-smooth);
+}
+
+.microgrid-card:hover .mg-header > i {
+    transform: scale(1.15) rotate(5deg);
 }
 
 .microgrid-card.solar .mg-header > i { color: var(--accent-yellow); }
@@ -303,6 +499,11 @@ body {
 .mg-name {
     font-weight: 600;
     font-size: 0.95rem;
+    transition: color var(--transition-quick);
+}
+
+.microgrid-card:hover .mg-name {
+    color: var(--accent-green);
 }
 
 .mg-type {
@@ -313,27 +514,36 @@ body {
 .mg-readings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
 .mg-reading {
     display: flex;
     justify-content: space-between;
-    padding: 0.4rem 0.6rem;
+    padding: 0.6rem 0.8rem;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    border-radius: 10px;
+    transition: all var(--transition-quick);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.microgrid-card:hover .mg-reading {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .reading-label {
     font-size: 0.75rem;
     color: var(--text-muted);
+    font-weight: 500;
 }
 
 .reading-value {
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
+    transition: color var(--transition-quick);
 }
 
 /* ============================================================================
@@ -362,13 +572,15 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.9rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s;
+    transition: all var(--transition-quick);
+    animation: slideInLeft 0.3s ease-out;
 }
 
 .alert-item:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
+    padding-left: 1.5rem;
 }
 
 .alert-item:last-child {
@@ -386,6 +598,11 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color var(--transition-quick);
+}
+
+.alert-item:hover .alert-msg {
+    color: var(--accent-green);
 }
 
 .alert-msg-cell {
@@ -398,11 +615,23 @@ body {
 /* ============================================================================
    BADGE STYLES
    ============================================================================ */
-.badge-danger  { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; }
-.badge-warning { background: rgba(245, 158, 11, 0.2) !important; color: #fcd34d !important; }
-.badge-info    { background: rgba(6, 182, 212, 0.2) !important; color: #67e8f9 !important; }
-.badge-success { background: rgba(16, 185, 129, 0.2) !important; color: #6ee7b7 !important; }
-.badge-secondary { background: rgba(148, 163, 184, 0.2) !important; color: #cbd5e1 !important; }
+.badge {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: all var(--transition-quick);
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+.badge-danger  { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239, 68, 68, 0.4); }
+.badge-warning { background: rgba(245, 158, 11, 0.2) !important; color: #fcd34d !important; border: 1px solid rgba(245, 158, 11, 0.4); }
+.badge-info    { background: rgba(6, 182, 212, 0.2) !important; color: #67e8f9 !important; border: 1px solid rgba(6, 182, 212, 0.4); }
+.badge-success { background: rgba(16, 185, 129, 0.2) !important; color: #6ee7b7 !important; border: 1px solid rgba(16, 185, 129, 0.4); }
+.badge-secondary { background: rgba(148, 163, 184, 0.2) !important; color: #cbd5e1 !important; border: 1px solid rgba(148, 163, 184, 0.4); }
 
 /* ============================================================================
    BATTERY VISUAL
@@ -410,46 +639,69 @@ body {
 .battery-visual {
     display: flex;
     justify-content: center;
+    padding: 2rem 0;
 }
 
 .battery-shell {
     display: flex;
     flex-direction: column;
     align-items: center;
+    animation: slideInUp 0.5s ease-out;
 }
 
 .battery-cap {
     width: 40px;
-    height: 10px;
+    height: 12px;
     background: var(--text-muted);
     border-radius: 4px 4px 0 0;
+    transition: background var(--transition-smooth);
 }
 
 .battery-body {
-    width: 100px;
-    height: 160px;
+    width: 120px;
+    height: 180px;
     border: 3px solid var(--text-muted);
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 10px 10px;
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
+    background: rgba(0, 0, 0, 0.2);
+    transition: border-color var(--transition-smooth);
+}
+
+.battery-body:hover {
+    border-color: var(--accent-green);
 }
 
 .battery-fill {
     width: 100%;
-    transition: height 0.5s ease;
+    transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0 0 5px 5px;
+    border-radius: 0 0 7px 7px;
+    position: relative;
+}
+
+.battery-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
 }
 
 .battery-pct {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 1;
 }
 
 /* ============================================================================
@@ -495,22 +747,101 @@ body {
    ============================================================================ */
 .form-control, .form-select {
     background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-color);
     color: var(--text-primary);
     border-radius: 10px;
+    transition: all var(--transition-smooth);
+    font-size: 0.9rem;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
 }
 
 .form-control:focus, .form-select:focus {
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.9);
     border-color: var(--accent-green);
     color: var(--text-primary);
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    transform: scale(1.01);
 }
 
 .form-label {
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    transition: color var(--transition-quick);
+}
+
+.form-control:focus ~ .form-label,
+.form-control:not(:placeholder-shown) ~ .form-label {
+    color: var(--accent-green);
+}
+
+/* ============================================================================
+   BUTTONS & INTERACTIVE ELEMENTS
+   ============================================================================ */
+.btn {
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all var(--transition-smooth);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-green), #059669);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
 }
 
 /* ============================================================================
@@ -520,11 +851,21 @@ body {
     background: var(--bg-secondary) !important;
     border: 1px solid var(--border-color);
     border-radius: 16px;
+    animation: scaleIn 0.3s ease-out;
 }
 
 .modal-content.bg-dark .modal-header,
 .modal-content.bg-dark .modal-footer {
     border-color: var(--border-color);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.modal-content.bg-dark .modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-content.bg-dark .modal-footer {
+    border-top: 1px solid var(--border-color);
 }
 
 /* ============================================================================
@@ -533,10 +874,12 @@ body {
 @media (max-width: 767.98px) {
     .sidebar {
         transform: translateX(-100%);
+        z-index: 1001;
     }
 
     .sidebar.show {
         transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
     }
 
     .main-content {
@@ -544,15 +887,23 @@ body {
     }
 
     .content-wrapper {
-        padding: 1rem;
+        padding: 1.5rem 1rem;
     }
 
     .stat-value {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
     }
 
     .stat-card {
+        padding: 1rem 1.25rem;
+    }
+
+    .dashboard-card .card-body {
         padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
     }
 }
 
@@ -562,12 +913,18 @@ body {
     }
 }
 
+@media (max-width: 1200px) {
+    .mg-readings {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ============================================================================
    SCROLLBAR
    ============================================================================ */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -575,12 +932,41 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+    border-radius: 4px;
+    transition: background var(--transition-smooth);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+}
+
+/* ============================================================================
+   PROGRESS BARS
+   ============================================================================ */
+.progress {
+    background: rgba(0, 0, 0, 0.3);
+    height: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--accent-green), #34d399);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.progress-bar.bg-info {
+    background: linear-gradient(90deg, var(--accent-cyan), #22d3ee) !important;
+}
+
+.progress-bar.bg-warning {
+    background: linear-gradient(90deg, var(--accent-yellow), #fbbf24) !important;
+}
+
+.progress-bar.bg-danger {
+    background: linear-gradient(90deg, var(--accent-red), #f87171) !important;
 }
 
 /* ============================================================================
@@ -588,6 +974,57 @@ body {
    ============================================================================ */
 canvas {
     max-width: 100%;
+}
+
+/* ============================================================================
+   TABLE ENHANCEMENTS
+   ============================================================================ */
+.table-hover tbody tr {
+    transition: all var(--transition-quick);
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(16, 185, 129, 0.08) !important;
+    transform: scale(1.01);
+}
+
+/* ============================================================================
+   LIST ITEM ANIMATIONS
+   ============================================================================ */
+.list-group-item {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: var(--border-color);
+    transition: all var(--transition-smooth);
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.list-group-item:hover {
+    background: rgba(16, 185, 129, 0.1);
+    Transform: translateX(4px);
+}
+
+.list-group-item.active {
+    background: linear-gradient(135deg, var(--accent-green), #059669);
+    border-color: var(--accent-green);
+}
+
+/* ============================================================================
+   FADE & TRANSITION UTILITIES
+   ============================================================================ */
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.scale-in {
+    animation: scaleIn 0.5s ease-out;
 }
 
 /* ============================================================================

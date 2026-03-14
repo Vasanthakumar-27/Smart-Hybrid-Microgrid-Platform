@@ -92,15 +92,17 @@ $csrf = generateCSRFToken();
 
         /* LEFT SIDE - FEATURES */
         .features-section {
-            flex: 1;
+            flex: 0.8;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.08));
-            padding: 3rem 2rem;
+            padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
             backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             animation: slideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         @keyframes slideInLeft {
@@ -115,20 +117,20 @@ $csrf = generateCSRFToken();
         }
 
         .feature-header {
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
         .feature-header-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
             background: linear-gradient(135deg, #10b981, #34d399);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: white;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s backwards;
         }
 
@@ -150,7 +152,7 @@ $csrf = generateCSRFToken();
         }
 
         .feature-header h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #f1f5f9;
             margin: 0;
@@ -160,8 +162,8 @@ $csrf = generateCSRFToken();
 
         .feature-header p {
             color: #cbd5e1;
-            font-size: 1rem;
-            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
             animation: slideInUp 0.8s ease-out 0.15s backwards;
         }
 
@@ -180,14 +182,14 @@ $csrf = generateCSRFToken();
         .features-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .feature-card {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 1rem;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
             animation: slideInUp 0.8s ease-out backwards;
@@ -260,12 +262,14 @@ $csrf = generateCSRFToken();
 
         /* RIGHT SIDE - LOGIN FORM */
         .login-section {
-            flex: 1;
-            padding: 3rem 2rem;
+            flex: 1.2;
+            padding: 2rem 1.5rem;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
             animation: slideInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-height: 100vh;
         }
 
         @keyframes slideInRight {
@@ -289,21 +293,21 @@ $csrf = generateCSRFToken();
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 18px;
-            padding: 2.5rem;
+            padding: 2rem;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
         }
 
         .brand-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px;
+            width: 65px;
+            height: 65px;
+            border-radius: 12px;
             background: linear-gradient(135deg, #10b981, #3b82f6);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: white;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 1rem;
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
             animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
@@ -322,24 +326,24 @@ $csrf = generateCSRFToken();
         }
 
         .brand-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: #f1f5f9;
             text-align: center;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
             animation: slideInUp 0.8s ease-out 0.15s backwards;
         }
 
         .brand-subtitle {
             color: #94a3b8;
             text-align: center;
-            font-size: 0.85rem;
-            margin-bottom: 1.8rem;
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
             animation: slideInUp 0.8s ease-out 0.2s backwards;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             animation: slideInUp 0.8s ease-out backwards;
         }
 
@@ -349,8 +353,8 @@ $csrf = generateCSRFToken();
         .form-label {
             color: #cbd5e1;
             font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 0.6rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
             display: block;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -420,13 +424,13 @@ $csrf = generateCSRFToken();
         .btn-login {
             background: linear-gradient(135deg, #10b981, #059669);
             border: none;
-            padding: 0.85rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: white;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 0.8rem;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
             position: relative;
@@ -479,9 +483,9 @@ $csrf = generateCSRFToken();
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.05));
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 12px;
-            padding: 1.25rem;
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
             color: #93c5fd;
             animation: slideInUp 0.8s ease-out 0.4s backwards;
         }
@@ -489,77 +493,154 @@ $csrf = generateCSRFToken();
         .demo-info strong {
             color: #bfdbfe;
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.8rem;
         }
 
         .demo-info code {
             color: #a5f3fc;
             background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.7rem;
             margin: 0 2px;
         }
 
         /* Responsive */
+        @media (max-width: 1200px) {
+            .features-section {
+                flex: 0.7;
+                padding: 1.5rem 1.2rem;
+            }
+
+            .feature-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .feature-header-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            .login-section {
+                flex: 1.3;
+                padding: 1.5rem 1.2rem;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+            }
+
+            .brand-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+
         @media (max-width: 992px) {
             .login-wrapper {
                 flex-direction: column;
             }
 
             .features-section {
+                flex: 1;
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                min-height: 50vh;
-                justify-content: center;
+                padding: 2rem 1.5rem;
+                max-height: none;
             }
 
             .feature-header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
-            .feature-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.1rem;
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
             }
 
             .login-section {
-                min-height: 50vh;
+                flex: 1;
+                min-height: auto;
+                padding: 2rem 1.5rem;
             }
         }
 
         @media (max-width: 768px) {
             .features-section {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem 1rem;
             }
 
             .feature-header h1 {
-                font-size: 1.7rem;
-            }
-
-            .feature-header {
-                margin-bottom: 2rem;
+                font-size: 1.5rem;
             }
 
             .features-grid {
-                gap: 1rem;
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
             }
 
             .feature-card {
-                padding: 1rem;
+                padding: 0.8rem;
             }
 
             .login-section {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem 1rem;
             }
 
             .login-card {
-                padding: 2rem;
+                padding: 1.5rem;
+            }
+
+            .brand-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+                margin-bottom: 0.8rem;
             }
 
             .brand-title {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
+            }
+
+            .brand-subtitle {
+                font-size: 0.75rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .login-form-wrapper {
+                max-width: 100%;
+            }
+
+            .demo-info {
+                padding: 0.8rem;
+                margin-top: 0.8rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .feature-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .feature-title {
+                font-size: 0.85rem;
+            }
+
+            .feature-desc {
+                font-size: 0.75rem;
+            }
+
+            .brand-title {
+                font-size: 1.2rem;
+            }
+
+            .btn-login {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
             }
         }
     </style>
