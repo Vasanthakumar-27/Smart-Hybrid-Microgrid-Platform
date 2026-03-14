@@ -44,15 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'Username, password, and full name are required.';
                 $msgType = 'danger';
             }
-        } elseif ($action === 'reset_password') {
-            $userId = (int) ($_POST['user_id'] ?? 0);
-            $newPass = $_POST['new_password'] ?? '';
-            if ($userId && strlen($newPass) >= 4) {
-                $hash = password_hash($newPass, PASSWORD_DEFAULT);
-                $db->prepare("UPDATE users SET password_hash = ? WHERE user_id = ?")->execute([$hash, $userId]);
-                $message = 'Password reset successfully.';
-                $msgType = 'success';
-            }
         } elseif ($action === 'delete') {
             $userId = (int) ($_POST['user_id'] ?? 0);
             if ($userId > 1 && $userId !== getCurrentUserId()) {
@@ -113,9 +104,6 @@ $csrf = generateCSRFToken();
                         <td><?= h($u['email'] ?? '-') ?></td>
                         <td><?= date('d M Y', strtotime($u['created_at'])) ?></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-warning" onclick="resetPass(<?= $u['user_id'] ?>, '<?= h($u['username']) ?>')">
-                                <i class="bi bi-key"></i>
-                            </button>
                             <?php if ($u['user_id'] > 1 && $u['user_id'] !== getCurrentUserId()): ?>
                             <form method="POST" style="display:inline" onsubmit="return confirm('Delete this user?')">
                                 <input type="hidden" name="action" value="delete">
@@ -190,40 +178,5 @@ $csrf = generateCSRFToken();
         </div>
     </div>
 </div>
-
-<!-- Reset Password Modal -->
-<div class="modal fade" id="resetPassModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content bg-dark">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">Reset Password</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="action" value="reset_password">
-                    <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
-                    <input type="hidden" name="user_id" id="resetUserId">
-                    <p class="text-muted">Reset password for: <strong id="resetUsername"></strong></p>
-                    <div class="mb-3">
-                        <label class="form-label">New Password</label>
-                        <input type="password" name="new_password" class="form-control" required minlength="4">
-                    </div>
-                </div>
-                <div class="modal-footer border-secondary">
-                    <button type="submit" class="btn btn-warning">Reset Password</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-function resetPass(id, username) {
-    document.getElementById('resetUserId').value = id;
-    document.getElementById('resetUsername').textContent = username;
-    new bootstrap.Modal(document.getElementById('resetPassModal')).show();
-}
-</script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

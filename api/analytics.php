@@ -56,6 +56,7 @@ switch ($action) {
     case 'realtime':
         // Get latest reading for each microgrid
         $sql = "SELECT m.microgrid_id, m.microgrid_name, m.type, m.capacity_kw,
+                       m.status as configured_status,
                        er.voltage, er.current_amp, er.power_kw, er.energy_kwh, er.temperature, er.timestamp
                 FROM microgrids m
                 LEFT JOIN energy_readings er ON er.reading_id = (
@@ -68,16 +69,41 @@ switch ($action) {
         $stmt->execute([$familyId]);
         $grids = $stmt->fetchAll();
 
+        foreach ($grids as &$g) {
+            $g['operational_status'] = getMicrogridOperationalStatus($g, $g['timestamp'] ? $g : null);
+            $g['health'] = getMicrogridHealthScore($g);
+        }
+        unset($g);
+
         $battery = getLatestBatteryStatus($familyId);
         $alerts = getActiveAlerts($familyId);
+        $flow = getEnergyFlowSnapshot($familyId);
 
         echo json_encode([
             'success'   => true,
             'microgrids'=> $grids,
             'battery'   => $battery,
             'alerts'    => $alerts,
+            'flow'      => $flow,
             'timestamp' => date('Y-m-d H:i:s'),
         ]);
+        break;
+
+    case 'health_summary':
+        echo json_encode(['success' => true, 'data' => getFamilyMicrogridHealthSummary($familyId)]);
+        break;
+
+    case 'energy_flow':
+        echo json_encode(['success' => true, 'data' => getEnergyFlowSnapshot($familyId)]);
+        break;
+
+    case 'system_logs':
+        $limit = min((int) ($_GET['limit'] ?? 50), 200);
+        if (isAdmin() && empty($_GET['family_id'])) {
+            echo json_encode(['success' => true, 'data' => getRecentSystemLogs(null, $limit)]);
+        } else {
+            echo json_encode(['success' => true, 'data' => getRecentSystemLogs($familyId, $limit)]);
+        }
         break;
 
     case 'battery_history':
@@ -119,5 +145,5 @@ switch ($action) {
 
     default:
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid action. Valid: daily_generation, source_contribution, weekly_trends, monthly_reports, savings, realtime, battery_history, platform_stats, all_families_energy']);
+        echo json_encode(['error' => 'Invalid action. Valid: daily_generation, source_contribution, weekly_trends, monthly_reports, savings, realtime, battery_history, health_summary, energy_flow, system_logs, platform_stats, all_families_energy']);
 }

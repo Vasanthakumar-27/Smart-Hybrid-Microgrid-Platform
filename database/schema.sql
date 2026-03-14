@@ -41,6 +41,10 @@ CREATE TABLE microgrids (
     type          ENUM('solar','wind') NOT NULL,
     capacity_kw   DECIMAL(10,2) NOT NULL,
     location      VARCHAR(255) DEFAULT NULL,
+    location_name VARCHAR(150) DEFAULT NULL,
+    latitude      DECIMAL(10,7) DEFAULT NULL,
+    longitude     DECIMAL(10,7) DEFAULT NULL,
+    expected_generation_kw DECIMAL(10,2) DEFAULT NULL,
     installed_on  DATE DEFAULT NULL,
     status        ENUM('active','inactive','maintenance') DEFAULT 'active',
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -135,6 +139,22 @@ CREATE TABLE api_keys (
     is_active     TINYINT(1) DEFAULT 1,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (family_id) REFERENCES families(family_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================================
+-- 10. SYSTEM LOGS TABLE (Audit trail)
+-- ============================================================================
+CREATE TABLE system_logs (
+    log_id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    family_id     INT NULL,
+    user_id       INT NULL,
+    microgrid_id  INT NULL,
+    event_type    VARCHAR(60) NOT NULL,
+    severity      ENUM('info','warning','critical') DEFAULT 'info',
+    message       VARCHAR(500) NOT NULL,
+    timestamp     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_logs_time (timestamp),
+    INDEX idx_logs_family (family_id)
 ) ENGINE=InnoDB;
 
 -- ============================================================================

@@ -61,11 +61,20 @@ if (isLoggedIn()) {
         <a href="<?= BASE_URL ?>savings.php" class="nav-link <?= $currentPage === 'savings' ? 'active' : '' ?>">
             <i class="bi bi-piggy-bank"></i> <span>Savings</span>
         </a>
+        <a href="<?= BASE_URL ?>reports.php" class="nav-link <?= $currentPage === 'reports' ? 'active' : '' ?>">
+            <i class="bi bi-file-earmark-bar-graph"></i> <span>Reports</span>
+        </a>
+        <a href="<?= BASE_URL ?>logs.php" class="nav-link <?= $currentPage === 'logs' ? 'active' : '' ?>">
+            <i class="bi bi-journal-text"></i> <span>System Logs</span>
+        </a>
         <a href="<?= BASE_URL ?>alerts.php" class="nav-link <?= $currentPage === 'alerts' ? 'active' : '' ?>">
             <i class="bi bi-exclamation-triangle"></i> <span>Alerts</span>
             <?php if ($alertCount > 0): ?>
             <span class="badge bg-danger ms-auto"><?= $alertCount ?></span>
             <?php endif; ?>
+        </a>
+        <a href="<?= BASE_URL ?>profile.php" class="nav-link <?= $currentPage === 'profile' ? 'active' : '' ?>">
+            <i class="bi bi-person-gear"></i> <span>My Profile</span>
         </a>
 
         <?php if (isAdmin()): ?>

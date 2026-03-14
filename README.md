@@ -66,6 +66,35 @@ A comprehensive renewable energy management system for monitoring hybrid microgr
 - Admin can monitor all families from a centralized view
 - Family-level energy comparison charts
 
+### 9. Microgrid Health Intelligence
+- Health score formula: `0.4 × efficiency + 0.3 × uptime + 0.3 × battery health`
+- Health shown per microgrid as `% Healthy`
+- Operational states include: **Active**, **Offline**, **Maintenance**, **Fault**
+
+### 10. Energy Flow Visualization
+- Visual flow cards and arrows:
+      - `Solar -> Battery -> Load`
+      - `Wind -> Battery`
+      - `Battery -> Consumption`
+- Updates with realtime family context
+
+### 11. Predictive Fault Rules
+- Inverter fault prediction: sudden voltage drop + current spike
+- Solar dirty panel warning: output below expected behavior
+- Wind abnormal output warning
+- Battery draining fast predictive warning
+
+### 12. Admin + Operations Enhancements
+- Admin quick actions: Create Family, Add Microgrid, Assign User, View Status, Manage Alerts, Reports
+- Microgrid management table now includes Battery and Health columns
+- Status controls support **active / inactive / maintenance**
+
+### 13. Reports, Logs, and Profile
+- `reports.php`: daily/weekly/monthly reports + CSV export + print-to-PDF workflow
+- `logs.php`: system event timeline (user logins, alerts, platform events)
+- `profile.php`: user self-service profile and password change
+- Admin password reset for other users removed (users change their own password)
+
 ---
 
 ## 🏗️ Architecture
@@ -102,6 +131,9 @@ microgrid-platform/
 ├── analytics.php              # Energy analytics & reports
 ├── savings.php                # Financial savings & environmental impact
 ├── alerts.php                 # Alert management & fault detection
+├── reports.php                # Daily/weekly/monthly reports + exports
+├── logs.php                   # System logs timeline
+├── profile.php                # User profile & password management
 ├── logout.php                 # Logout handler
 ├── .htaccess                  # Apache security & rewrite rules
 └── README.md                  # This file
@@ -175,6 +207,18 @@ http://localhost/microgrid-platform/
 | `energy_consumption` | Household energy consumption tracking |
 | `tariff_settings` | Grid electricity rates for savings calculation |
 | `api_keys` | API authentication for IoT devices |
+| `system_logs` | Platform event audit timeline |
+
+### Schema Migration (March 2026)
+Run the migration once after pulling updates:
+
+```powershell
+Get-Content "database/migrations/20260314_feature_upgrade.sql" | & "C:\xampp\mysql\bin\mysql.exe" -u root
+```
+
+This migration adds:
+- optional microgrid metadata (`location_name`, `latitude`, `longitude`, `expected_generation_kw`)
+- `system_logs` table for event/audit tracking
 
 ### Key Relationships
 - **Family** → has many **Users**, **Microgrids**, **Battery Records**, **Alerts**
@@ -237,6 +281,9 @@ Body:
 | `monthly_reports` | Monthly breakdown by source |
 | `savings` | Financial savings calculation |
 | `battery_history` | Battery SoC history (param: `hours`) |
+| `health_summary` | Per-microgrid health components and score |
+| `energy_flow` | Solar/wind/battery/load flow snapshot |
+| `system_logs` | Recent system event logs |
 | `platform_stats` | Admin-only platform overview |
 | `all_families_energy` | Admin-only family comparison |
 
@@ -266,6 +313,9 @@ Body:
 | Analytics | Daily, weekly, monthly energy analysis |
 | Savings | Financial savings, tariff breakdown, environmental impact |
 | Alerts | Fault detection, alert management |
+| Reports | Daily/weekly/monthly reports, CSV, print-to-PDF |
+| System Logs | Event timeline for operations and diagnostics |
+| My Profile | Update profile and change password |
 
 ---
 

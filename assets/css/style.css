@@ -4,18 +4,18 @@
    ============================================================================ */
 
 :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-card: #1e293b;
-    --bg-sidebar: #0f172a;
+    --bg-primary: #0f1c2b;
+    --bg-secondary: #1b2b3f;
+    --bg-card: #243a54;
+    --bg-sidebar: #1a2f46;
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
     --border-color: rgba(255, 255, 255, 0.08);
-    --accent-green: #10b981;
-    --accent-blue: #3b82f6;
-    --accent-yellow: #f59e0b;
-    --accent-red: #ef4444;
+    --accent-green: #16a34a;
+    --accent-blue: #3B6790;
+    --accent-yellow: #EFB036;
+    --accent-red: #dc2626;
     --accent-purple: #8b5cf6;
     --accent-cyan: #06b6d4;
     --sidebar-width: 250px;
@@ -275,7 +275,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: linear-gradient(135deg, var(--bg-secondary), rgba(30, 41, 59, 0.8));
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(59, 103, 144, 0.2));
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -403,7 +403,7 @@ body {
    DASHBOARD CARDS
    ============================================================================ */
 .dashboard-card, .card.dashboard-card {
-    background: linear-gradient(135deg, var(--bg-card), rgba(30, 41, 59, 0.5));
+    background: linear-gradient(135deg, var(--bg-card), rgba(59, 103, 144, 0.2));
     border: 1px solid var(--border-color);
     border-radius: 16px;
     overflow: hidden;
@@ -1065,4 +1065,66 @@ canvas {
 .live-offline .live-dot {
     animation: none;
     opacity: 0.8;
+}
+
+/* ============================================================================
+   DASHBOARD ENHANCEMENTS
+   ============================================================================ */
+.admin-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.8rem;
+}
+
+.flow-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.flow-node {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.85rem;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.35);
+    animation: slideInUp 0.45s ease-out;
+}
+
+.flow-node i {
+    font-size: 1.2rem;
+    margin-bottom: 0.35rem;
+    display: inline-block;
+}
+
+.solar-node i { color: var(--accent-yellow); }
+.wind-node i { color: var(--accent-blue); }
+.battery-node i { color: var(--accent-green); }
+.load-node i { color: var(--accent-red); }
+
+.flow-arrow {
+    color: var(--accent-green);
+    font-size: 1.3rem;
+    font-weight: 700;
+    animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+.health-row {
+    margin-bottom: 0.8rem;
+}
+
+.health-row:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+    .flow-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+        justify-self: center;
+    }
 }

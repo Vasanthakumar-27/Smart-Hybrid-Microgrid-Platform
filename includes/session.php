@@ -81,6 +81,34 @@ function authenticateUser(string $username, string $password): ?array {
         $_SESSION['family_id']   = $user['family_id'];
         $_SESSION['full_name']   = $user['full_name'];
         $_SESSION['family_name'] = $user['family_name'];
+
+        // Record login event for system audit timeline.
+        try {
+            $db->exec("CREATE TABLE IF NOT EXISTS system_logs (
+                log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                family_id INT NULL,
+                user_id INT NULL,
+                microgrid_id INT NULL,
+                event_type VARCHAR(60) NOT NULL,
+                severity ENUM('info','warning','critical') NOT NULL DEFAULT 'info',
+                message VARCHAR(500) NOT NULL,
+                timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_logs_time (timestamp),
+                INDEX idx_logs_family (family_id),
+                INDEX idx_logs_event (event_type)
+            ) ENGINE=InnoDB");
+
+            $stmt = $db->prepare("INSERT INTO system_logs (family_id, user_id, event_type, severity, message, timestamp)
+                                  VALUES (?, ?, 'user_login', 'info', ?, NOW())");
+            $stmt->execute([
+                $user['family_id'] ? (int) $user['family_id'] : null,
+                (int) $user['user_id'],
+                'User login: ' . $user['username'],
+            ]);
+        } catch (Exception $e) {
+            // Logging must never block login.
+        }
+
         return $user;
     }
     return null;
