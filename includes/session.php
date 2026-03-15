@@ -8,6 +8,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/session_timeout.php';
+
+// Initialize and validate session security
+SessionTimeout::setupSession();
+$sessionValidation = SessionTimeout::validate();
+
+// Redirect if session invalid
+if (!$sessionValidation['valid'] && isset($_SESSION['user_id'])) {
+    SessionTimeout::destroySession($sessionValidation['reason']);
+    header('Location: ' . BASE_URL . 'index.php?session_expired=1&reason=' . urlencode($sessionValidation['reason']));
+    exit;
+}
 
 /**
  * Check if user is logged in

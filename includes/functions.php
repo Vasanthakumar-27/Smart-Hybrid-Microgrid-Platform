@@ -392,11 +392,15 @@ function checkAndGenerateAlerts(int $microgridId, array $reading): void {
         }
     }
 
-    // Insert alerts
+    // Insert alerts and send notifications
     $insertStmt = $db->prepare("INSERT INTO alerts (family_id, microgrid_id, alert_type, severity, message) VALUES (?, ?, ?, ?, ?)");
     foreach ($alerts as $alert) {
         $insertStmt->execute([$familyId, $microgridId, $alert[0], $alert[1], $alert[2]]);
+        $alertId = (int) $db->lastInsertId();
         logSystemEvent($familyId, null, $microgridId, 'alert_generated', $alert[2], $alert[1]);
+        
+        // Send email notifications to users
+        sendAlertNotifications($alertId, $familyId, $microgridId);
     }
 }
 
@@ -442,7 +446,11 @@ function checkBatteryAlerts(int $familyId, array $batteryData): void {
     $insertStmt = $db->prepare("INSERT INTO alerts (family_id, alert_type, severity, message) VALUES (?, ?, ?, ?)");
     foreach ($alerts as $alert) {
         $insertStmt->execute([$familyId, $alert[0], $alert[1], $alert[2]]);
+        $alertId = (int) $db->lastInsertId();
         logSystemEvent($familyId, null, null, 'battery_alert', $alert[2], $alert[1]);
+        
+        // Send email notifications to users
+        sendAlertNotifications($alertId, $familyId);
     }
 }
 
@@ -799,4 +807,118 @@ function hasTableColumn(string $tableName, string $columnName): bool {
     $exists = (int) $stmt->fetchColumn() > 0;
     $cache[$cacheKey] = $exists;
     return $exists;
+}
+
+// ============================================================================
+// EMAIL NOTIFICATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Send alert notifications to users based on their preferences
+ */
+function sendAlertNotifications(int $alertId, int $familyId, ?int $microgridId = null): void {
+    require_once __DIR__ . '/mailer.php';
+
+    if (!Mailer::isEnabled()) {
+        return;
+    }
+
+    $db = getDB();
+
+    // Get alert details
+    $stmt = $db->prepare("SELECT a.*, m.microgrid_name FROM alerts a
+                         LEFT JOIN microgrids m ON a.microgrid_id = m.microgrid_id
+                         WHERE a.alert_id = ?");
+    $stmt->execute([$alertId]);
+    $alert = $stmt->fetch();
+
+    if (!$alert) {
+        return;
+    }
+
+    // Get family name
+    $stmt = $db->prepare("SELECT family_name FROM families WHERE family_id = ?");
+    $stmt->execute([$familyId]);
+    $family = $stmt->fetch();
+    $familyName = $family['family_name'] ?? null;
+
+    // Find all users in this family with matching notification preferences
+    $stmt = $db->prepare("
+        SELECT u.user_id, u.email, u.name,
+               u.email_notifications_enabled,
+               u.email_notify_critical,
+               u.email_notify_warning,
+               u.email_notify_info
+        FROM family_users fu
+        JOIN users u ON fu.user_id = u.user_id
+        WHERE fu.family_id = ?
+        AND u.email IS NOT NULL
+        AND u.email != ''
+        AND u.email_notifications_enabled = 1
+    ");
+    $stmt->execute([$familyId]);
+    $users = $stmt->fetchAll();
+
+    foreach ($users as $user) {
+        // Check severity-based notification preference
+        $shouldNotify = false;
+        $severity = strtolower($alert['severity'] ?? '');
+
+        if ($severity === 'critical' && $user['email_notify_critical']) {
+            $shouldNotify = true;
+        } elseif ($severity === 'warning' && $user['email_notify_warning']) {
+            $shouldNotify = true;
+        } elseif ($severity === 'info' && $user['email_notify_info']) {
+            $shouldNotify = true;
+        }
+
+        if (!$shouldNotify) {
+            continue;
+        }
+
+        // Check if we already sent this alert to this user (prevent duplicates)
+        $stmt2 = $db->prepare("
+            SELECT COUNT(*) FROM email_notification_log
+            WHERE user_id = ? AND alert_id = ? AND status = 'sent'
+        ");
+        $stmt2->execute([$user['user_id'], $alertId]);
+        if ((int) $stmt2->fetchColumn() > 0) {
+            continue;
+        }
+
+        // Send the email
+        $success = Mailer::sendAlertNotification(
+            $user['email'],
+            $user['name'],
+            $alert,
+            $familyName
+        );
+
+        // Log the notification attempt
+        $stmt2 = $db->prepare("
+            INSERT INTO email_notification_log
+            (user_id, alert_id, recipient_email, alert_type, alert_severity, alert_message, email_subject, status, send_method)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt2->execute([
+            $user['user_id'],
+            $alertId,
+            $user['email'],
+            $alert['alert_type'],
+            $alert['severity'],
+            $alert['message'],
+            '[' . strtoupper($alert['severity'] ?? 'UNKNOWN') . '] ' . str_replace('_', ' ', ucwords(strtolower($alert['alert_type'] ?? ''))),
+            $success ? 'sent' : 'failed',
+            'php',
+        ]);
+    }
+}
+
+/**
+ * Send notifications for a batch of alerts
+ */
+function sendBatchAlertNotifications(array $alertIds, int $familyId): void {
+    foreach ($alertIds as $alertId) {
+        sendAlertNotifications((int) $alertId, $familyId);
+    }
 }

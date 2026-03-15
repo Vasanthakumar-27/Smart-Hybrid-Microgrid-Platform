@@ -9,6 +9,8 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/query_cache.php';
+require_once __DIR__ . '/../includes/analytics_cached.php';
 
 if (!isLoggedIn()) {
     http_response_code(401);

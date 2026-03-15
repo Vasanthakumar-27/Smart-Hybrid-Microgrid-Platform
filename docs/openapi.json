@@ -1,0 +1,621 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MicroGrid Pro API",
+    "description": "RESTful API for MicroGrid Pro - Smart Microgrid Energy Management Platform",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@microgrid.pro"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost/microgrid-platform/api",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.microgrid.pro",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Two-Factor Authentication (2FA) management"
+    },
+    {
+      "name": "Health",
+      "description": "System health and monitoring endpoints"
+    },
+    {
+      "name": "Analytics",
+      "description": "Energy analytics and reporting"
+    },
+    {
+      "name": "IoT Sensors",
+      "description": "IoT device data ingestion and status"
+    }
+  ],
+  "paths": {
+    "/twofactor.php": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Two-Factor Authentication operations",
+        "description": "Manage 2FA setup, verification, and login",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["enable", "verify", "disable", "backup-codes", "verify-login"]
+            },
+            "description": "2FA operation to perform"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "6-digit TOTP code or 8-character backup code",
+                    "pattern": "^[0-9A-Z]{6,8}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "User password (for disable action)"
+                  },
+                  "user_id": {
+                    "type": "integer",
+                    "description": "User ID from password authentication"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "qr_url": {
+                      "type": "string",
+                      "description": "QR code URL for authenticator app"
+                    },
+                    "secret": {
+                      "type": "string",
+                      "description": "Base32-encoded TOTP secret"
+                    },
+                    "backup_codes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Single-use backup codes"
+                    },
+                    "code_type": {
+                      "type": "string",
+                      "enum": ["totp", "backup"],
+                      "description": "Type of code used in verification"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or request"
+          },
+          "401": {
+            "description": "Unauthorized - authentication required"
+          },
+          "403": {
+            "description": "2FA required for login"
+          }
+        }
+      }
+    },
+    "/health.php": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "System health check",
+        "description": "Check database, disk space, memory, and configuration status",
+        "responses": {
+          "200": {
+            "description": "System is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["healthy", "degraded"],
+                      "description": "Overall system status"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "properties": {
+                        "database": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["ok", "error"]
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "disk_space": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["ok", "warning", "critical"]
+                            },
+                            "percent_used": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "memory": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "percent_used": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "php_version": {
+                          "type": "string"
+                        },
+                        "session": {
+                          "type": "string"
+                        },
+                        "configuration": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - critical system issue"
+          }
+        }
+      }
+    },
+    "/analytics.php": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get analytics data",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "platform_stats",
+                "all_families_energy",
+                "daily_generation",
+                "weekly_trends",
+                "monthly_reports",
+                "battery_history",
+                "realtime"
+              ]
+            },
+            "description": "Analytics metric to retrieve"
+          },
+          {
+            "name": "family_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Family ID (required for some actions)"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 7
+            },
+            "description": "Number of days for historical data"
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 24
+            },
+            "description": "Number of hours for historical data"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          }
+        }
+      }
+    },
+    "/readings.php": {
+      "post": {
+        "tags": ["IoT Sensors"],
+        "summary": "Submit IoT sensor readings",
+        "description": "Ingest energy readings from IoT devices",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "API key for authentication"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["microgrid_id", "voltage", "current_amp", "power_kw"],
+                "properties": {
+                  "microgrid_id": {
+                    "type": "integer",
+                    "description": "ID of the microgrid"
+                  },
+                  "voltage": {
+                    "type": "number",
+                    "description": "Voltage in volts (100-500V)",
+                    "minimum": 100,
+                    "maximum": 500
+                  },
+                  "current_amp": {
+                    "type": "number",
+                    "description": "Current in amperes (0-100A)",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "power_kw": {
+                    "type": "number",
+                    "description": "Power in kilowatts (0-10000kW)",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "energy_kwh": {
+                    "type": "number",
+                    "description": "Energy in kilowatt-hours"
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "description": "Temperature in Celsius (-50 to 150°C)",
+                    "minimum": -50,
+                    "maximum": 150
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reading recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "description": "Reading ID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid sensor data"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      },
+      "get": {
+        "tags": ["IoT Sensors"],
+        "summary": "Get recent sensor readings",
+        "parameters": [
+          {
+            "name": "microgrid_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by microgrid ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sensor readings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "microgrid_id": {
+                        "type": "integer"
+                      },
+                      "voltage": {
+                        "type": "number"
+                      },
+                      "current_amp": {
+                        "type": "number"
+                      },
+                      "power_kw": {
+                        "type": "number"
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/battery.php": {
+      "post": {
+        "tags": ["IoT Sensors"],
+        "summary": "Submit battery status",
+        "description": "Ingest battery status from energy storage systems",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "API key for authentication"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["battery_level", "voltage"],
+                "properties": {
+                  "battery_level": {
+                    "type": "number",
+                    "description": "Battery charge level (0-100%)",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "voltage": {
+                    "type": "number",
+                    "description": "Battery voltage (100-500V)",
+                    "minimum": 100,
+                    "maximum": 500
+                  },
+                  "remaining_kwh": {
+                    "type": "number",
+                    "description": "Remaining energy in kWh"
+                  },
+                  "charge_status": {
+                    "type": "string",
+                    "enum": ["charging", "discharging", "idle"],
+                    "description": "Current charging state"
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "description": "Battery temperature in Celsius (-50 to 150°C)",
+                    "minimum": -50,
+                    "maximum": 150
+                  },
+                  "battery_name": {
+                    "type": "string",
+                    "description": "Battery identifier or name"
+                  },
+                  "capacity_kwh": {
+                    "type": "number",
+                    "description": "Total battery capacity in kWh"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Battery status recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid battery status data"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      },
+      "get": {
+        "tags": ["IoT Sensors"],
+        "summary": "Get recent battery status",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            },
+            "description": "Maximum number of records to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Battery status records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "battery_level": {
+                        "type": "number"
+                      },
+                      "voltage": {
+                        "type": "number"
+                      },
+                      "charge_status": {
+                        "type": "string"
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "session": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "PHPSESSID"
+      }
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    },
+    {
+      "session": []
+    }
+  ]
+}

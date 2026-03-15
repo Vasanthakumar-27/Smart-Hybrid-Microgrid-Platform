@@ -1,28 +1,125 @@
-# Smart Microgrid Platform - Apache Configuration
-# For XAMPP htdocs/microgrid-platform/
+# ============================================================================
+# MicroGrid Pro - Apache Security & HTTPS Configuration
+# ============================================================================
 
 RewriteEngine On
+RewriteBase /microgrid-platform/
 
-# Prevent directory listing
+# ============================================================================
+# 1. HTTPS ENFORCEMENT
+# ============================================================================
+
+# Redirect all HTTP traffic to HTTPS (301 permanent redirect)
+# Skip for Let's Encrypt validation (.well-known/acme-challenge)
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ============================================================================
+# 2. PREVENT DIRECTORY LISTING
+# ============================================================================
+
 Options -Indexes
 
-# Protect sensitive directories
+# ============================================================================
+# 3. PROTECT SENSITIVE DIRECTORIES & FILES
+# ============================================================================
+
 <IfModule mod_rewrite.c>
+    # Deny access to config and includes directories
     RewriteRule ^config/ - [F,L]
     RewriteRule ^includes/ - [F,L]
     RewriteRule ^database/(?!seed_demo_data\.php) - [F,L]
+    RewriteRule ^scripts/ - [F,L]
 </IfModule>
 
-# Set security headers
+# Prevent direct access to sensitive files
+<FilesMatch "\.(env|example|json|bak|backup|old|sql|log)$">
+    <IfModule mod_authz_core.c>
+        Deny from all
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Deny access to hidden files and directories
+<FilesMatch "^\.(env|git|htaccess|htpasswd)">
+    <IfModule mod_authz_core.c>
+        Deny from all
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ============================================================================
+# 4. SECURITY HEADERS
+# ============================================================================
+
 <IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-XSS-Protection "1; mode=block"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Strict Transport Security (force HTTPS for 1 year)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Prevent clickjacking attacks
+    Header always set X-Frame-Options "DENY"
+
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer Policy (limit referrer information)
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Remove sensitive headers
+    Header always unset "X-Powered-By"
+    Header always unset "Server"
+    Header always unset "X-AspNet-Version"
+
+    # Content Security Policy (restrict resource loading)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';"
 </IfModule>
 
-# PHP settings
+# ============================================================================
+# 5. PHP ERROR HANDLING (Suppress errors in production)
+# ============================================================================
+
 <IfModule mod_php.c>
     php_flag display_errors Off
+    php_flag display_startup_errors Off
     php_flag log_errors On
+    php_flag error_reporting E_ALL
+</IfModule>
+
+# ============================================================================
+# 6. SESSION SECURITY
+# ============================================================================
+
+php_flag session.cookie_httponly On
+php_flag session.cookie_secure On
+php_flag session.use_strict_mode On
+
+# ============================================================================
+# 7. COMPRESSION
+# ============================================================================
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# ============================================================================
+# 8. CACHING
+# ============================================================================
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
 </IfModule>

@@ -15,6 +15,9 @@ header('Access-Control-Allow-Headers: Content-Type, X-API-Key');
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/ratelimit.php';
+require_once __DIR__ . '/../includes/iot_queue.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -42,53 +45,74 @@ if (!$familyId) {
     exit;
 }
 
+// Enforce rate limiting
+$apiKey = $_SERVER['HTTP_X_API_KEY'] ?? $_GET['api_key'];
+enforceRateLimit($apiKey);
+
 if ($method === 'POST') {
     // Insert new energy reading
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (!$input || !isset($input['microgrid_id'], $input['voltage'], $input['current_amp'], $input['power_kw'])) {
+    if (!$input) {
         http_response_code(400);
-        echo json_encode(['error' => 'Missing required fields: microgrid_id, voltage, current_amp, power_kw']);
+        echo json_encode(['error' => 'Invalid JSON payload']);
         exit;
     }
 
+    // Validate input
+    $validation = validateIoTReading($input);
+    if (!$validation['valid']) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Validation failed', 'details' => $validation['errors']]);
+        exit;
+    }
+
+    $data = $validation['data'];
     $db = getDB();
 
     // Verify microgrid belongs to this family
     $stmt = $db->prepare("SELECT microgrid_id FROM microgrids WHERE microgrid_id = ? AND family_id = ?");
-    $stmt->execute([(int)$input['microgrid_id'], $familyId]);
+    $stmt->execute([$data['microgrid_id'], $familyId]);
     if (!$stmt->fetch()) {
         http_response_code(403);
         echo json_encode(['error' => 'Microgrid does not belong to your family']);
         exit;
     }
 
-    $readingData = [
-        'voltage'     => (float) $input['voltage'],
-        'current_amp' => (float) $input['current_amp'],
-        'power_kw'    => (float) $input['power_kw'],
-        'energy_kwh'  => (float) ($input['energy_kwh'] ?? 0),
-        'temperature' => isset($input['temperature']) ? (float) $input['temperature'] : null,
-    ];
+    try {
+        // Enqueue message for async processing
+        IoTMessageQueue::init();
+        $msgId = IoTMessageQueue::enqueue(
+            'device_' . $data['microgrid_id'],
+            'reading',
+            $data
+        );
 
-    $stmt = $db->prepare("INSERT INTO energy_readings (microgrid_id, voltage, current_amp, power_kw, energy_kwh, temperature, timestamp) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-    $stmt->execute([
-        (int) $input['microgrid_id'],
-        $readingData['voltage'],
-        $readingData['current_amp'],
-        $readingData['power_kw'],
-        $readingData['energy_kwh'],
-        $readingData['temperature'],
-    ]);
+        // Also process synchronously for backward compatibility
+        $stmt = $db->prepare("INSERT INTO energy_readings (microgrid_id, voltage, current_amp, power_kw, energy_kwh, temperature, timestamp) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([
+            $data['microgrid_id'],
+            $data['voltage'],
+            $data['current_amp'],
+            $data['power_kw'],
+            $data['energy_kwh'],
+            $data['temperature'],
+        ]);
 
-    // Check for fault alerts
-    checkAndGenerateAlerts((int)$input['microgrid_id'], $readingData);
+        // Check for fault alerts
+        checkAndGenerateAlerts($data['microgrid_id'], $data);
 
-    echo json_encode([
-        'success' => true,
-        'reading_id' => $db->lastInsertId(),
-        'message' => 'Reading recorded successfully'
-    ]);
+        echo json_encode([
+            'success' => true,
+            'reading_id' => $db->lastInsertId(),
+            'message_id' => $msgId,
+            'message' => 'Reading recorded successfully (queued for processing)'
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to record reading', 'detail' => sanitizeErrorMessage($e->getMessage())]);
+        exit;
+    }
 
 } elseif ($method === 'GET') {
     // Get recent readings for a microgrid

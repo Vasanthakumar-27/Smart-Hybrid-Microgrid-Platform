@@ -4,6 +4,7 @@
 
 # --- Sensitive config (collaborators copy from .example) ---
 config/database.php
+.env
 
 # --- Generated / runtime files ---
 _hashes.txt

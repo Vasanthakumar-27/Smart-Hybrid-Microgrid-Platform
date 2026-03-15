@@ -12,6 +12,9 @@ header('Access-Control-Allow-Headers: Content-Type, X-API-Key');
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/ratelimit.php';
+require_once __DIR__ . '/../includes/iot_queue.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -39,51 +42,63 @@ if (!$keyRow) {
 }
 $familyId = (int) $keyRow['family_id'];
 
+// Enforce rate limiting
+enforceRateLimit($apiKey);
+
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (!$input || !isset($input['battery_level'], $input['voltage'])) {
+    if (!$input) {
         http_response_code(400);
-        echo json_encode(['error' => 'Missing required fields: battery_level, voltage']);
+        echo json_encode(['error' => 'Invalid JSON payload']);
         exit;
     }
 
-    $batteryData = [
-        'battery_level' => (float) $input['battery_level'],
-        'voltage'       => (float) $input['voltage'],
-        'remaining_kwh' => (float) ($input['remaining_kwh'] ?? 0),
-        'charge_status' => $input['charge_status'] ?? 'idle',
-        'temperature'   => isset($input['temperature']) ? (float) $input['temperature'] : null,
-        'battery_name'  => $input['battery_name'] ?? 'Main Battery',
-        'capacity_kwh'  => (float) ($input['capacity_kwh'] ?? 10.00),
-    ];
-
-    // Validate charge_status
-    $validStatuses = ['charging', 'discharging', 'idle', 'full'];
-    if (!in_array($batteryData['charge_status'], $validStatuses)) {
-        $batteryData['charge_status'] = 'idle';
+    // Validate input
+    $validation = validateBatteryStatus($input);
+    if (!$validation['valid']) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Validation failed', 'details' => $validation['errors']]);
+        exit;
     }
 
-    $stmt = $db->prepare("INSERT INTO battery_status (family_id, battery_name, capacity_kwh, battery_level, voltage, remaining_kwh, charge_status, temperature, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-    $stmt->execute([
-        $familyId,
-        $batteryData['battery_name'],
-        $batteryData['capacity_kwh'],
-        $batteryData['battery_level'],
-        $batteryData['voltage'],
-        $batteryData['remaining_kwh'],
-        $batteryData['charge_status'],
-        $batteryData['temperature'],
-    ]);
+    $data = $validation['data'];
 
-    // Check battery alerts
-    checkBatteryAlerts($familyId, $batteryData);
+    try {
+        // Enqueue message for async processing
+        IoTMessageQueue::init();
+        $msgId = IoTMessageQueue::enqueue(
+            'battery_' . $familyId,
+            'battery',
+            $data
+        );
 
-    echo json_encode([
-        'success' => true,
-        'battery_id' => $db->lastInsertId(),
-        'message' => 'Battery status recorded'
-    ]);
+        // Also process synchronously for backward compatibility
+        $stmt = $db->prepare("INSERT INTO battery_status (family_id, battery_name, capacity_kwh, battery_level, voltage, remaining_kwh, charge_status, temperature, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([
+            $familyId,
+            $data['battery_name'],
+            $data['capacity_kwh'],
+            $data['battery_level'],
+            $data['voltage'],
+            $data['remaining_kwh'],
+            $data['charge_status'],
+            $data['temperature'],
+        ]);
+
+        // Check battery alerts
+        checkBatteryAlerts($familyId, $data);
+
+        echo json_encode([
+            'success' => true,
+            'battery_id' => $db->lastInsertId(),
+            'message' => 'Battery status recorded'
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to record battery status', 'detail' => sanitizeErrorMessage($e->getMessage())]);
+        exit;
+    }
 
 } elseif ($method === 'GET') {
     $limit = min((int) ($_GET['limit'] ?? 50), 500);
