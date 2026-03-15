@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports — MicroGrid Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/microgrid-platform/assets/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>MicroGrid Pro</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/microgrid-platform/dashboard.php" class="nav-link ">
+            <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+        </a>
+        <a href="/microgrid-platform/monitor.php" class="nav-link ">
+            <i class="bi bi-display"></i> <span>Live Monitor</span>
+        </a>
+        <a href="/microgrid-platform/battery.php" class="nav-link ">
+            <i class="bi bi-battery-charging"></i> <span>Battery</span>
+        </a>
+        <a href="/microgrid-platform/analytics.php" class="nav-link ">
+            <i class="bi bi-graph-up"></i> <span>Analytics</span>
+        </a>
+        <a href="/microgrid-platform/savings.php" class="nav-link ">
+            <i class="bi bi-piggy-bank"></i> <span>Savings</span>
+        </a>
+        <a href="/microgrid-platform/reports.php" class="nav-link active">
+            <i class="bi bi-file-earmark-bar-graph"></i> <span>Reports</span>
+        </a>
+        <a href="/microgrid-platform/logs.php" class="nav-link ">
+            <i class="bi bi-journal-text"></i> <span>System Logs</span>
+        </a>
+        <a href="/microgrid-platform/alerts.php" class="nav-link ">
+            <i class="bi bi-exclamation-triangle"></i> <span>Alerts</span>
+                        <span class="badge bg-danger ms-auto">15</span>
+                    </a>
+        <a href="/microgrid-platform/profile.php" class="nav-link ">
+            <i class="bi bi-person-gear"></i> <span>My Profile</span>
+        </a>
+
+                <div class="nav-divider">Administration</div>
+        <a href="/microgrid-platform/admin/families.php" class="nav-link ">
+            <i class="bi bi-houses"></i> <span>Families</span>
+        </a>
+        <a href="/microgrid-platform/admin/microgrids.php" class="nav-link ">
+            <i class="bi bi-grid-3x3-gap"></i> <span>Microgrids</span>
+        </a>
+        <a href="/microgrid-platform/admin/users.php" class="nav-link ">
+            <i class="bi bi-people"></i> <span>Users</span>
+        </a>
+            </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <i class="bi bi-person-circle"></i>
+            <div>
+                <div class="user-name">System Administrator</div>
+                <small class="user-role">Admin • Admin Family</small>
+            </div>
+        </div>
+        <a href="/microgrid-platform/logout.php" class="nav-link text-danger">
+            <i class="bi bi-box-arrow-left"></i> <span>Logout</span>
+        </a>
+    </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="main-content" id="mainContent">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="btn btn-sm btn-outline-secondary d-md-none" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h4 class="page-title mb-0">Reports</h4>
+        <div class="top-bar-right">
+            <span class="text-muted small">Sun, 15 Mar 2026 10:24</span>
+                        <a href="/microgrid-platform/alerts.php" class="btn btn-sm btn-outline-danger ms-2">
+                <i class="bi bi-bell-fill"></i> 15            </a>
+                    </div>
+    </div>
+
+    <!-- Page Content Container -->
+    <div class="content-wrapper">
+Date,Type,"Energy (kWh)"
+2026-02-13,solar,27.351
+2026-02-13,wind,38.015
+2026-02-14,solar,24.966
+2026-02-14,wind,40.090
+2026-02-15,solar,26.358
+2026-02-15,wind,37.970
+2026-02-16,solar,26.220
+2026-02-16,wind,37.367
+2026-02-17,solar,25.481
+2026-02-17,wind,39.118
+2026-02-18,solar,27.365
+2026-02-18,wind,37.545
+2026-02-19,solar,27.125
+2026-02-19,wind,36.594
+2026-02-20,solar,26.894
+2026-02-20,wind,40.427
+2026-02-21,solar,26.207
+2026-02-21,wind,38.017
+2026-02-22,solar,26.643
+2026-02-22,wind,37.924
+2026-02-23,solar,28.981
+2026-02-23,wind,41.334
+2026-02-24,solar,26.058
+2026-02-24,wind,38.769
+2026-02-25,solar,27.040
+2026-02-25,wind,39.260
+2026-02-26,solar,27.429
+2026-02-26,wind,40.507
+2026-02-27,solar,27.008
+2026-02-27,wind,40.136
+2026-02-28,solar,26.465
+2026-02-28,wind,38.418
+2026-03-01,solar,25.907
+2026-03-01,wind,37.250
+2026-03-02,solar,25.404
+2026-03-02,wind,34.696
+2026-03-03,solar,26.692
+2026-03-03,wind,37.805
+2026-03-04,solar,25.443
+2026-03-04,wind,39.710
+2026-03-05,solar,25.984
+2026-03-05,wind,37.026
+2026-03-06,solar,24.669
+2026-03-06,wind,38.706
+2026-03-07,solar,28.424
+2026-03-07,wind,39.169
+2026-03-08,solar,25.610
+2026-03-08,wind,36.253
+2026-03-09,solar,26.719
+2026-03-09,wind,38.641
+2026-03-10,solar,24.943
+2026-03-10,wind,40.375
+2026-03-11,solar,27.012
+2026-03-11,wind,39.075
+2026-03-12,solar,27.119
+2026-03-12,wind,39.120
+2026-03-13,solar,28.038
+2026-03-13,wind,35.274
+2026-03-14,solar,0.700
+2026-03-15,solar,4.960
+2026-03-15,wind,1.680
